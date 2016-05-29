@@ -12,7 +12,7 @@ gulp.task('lint', () => {
 });
 
 gulp.task('test', () => {
-  return gulp.src('./test/**.js')
+  return gulp.src('./test/**/*.js')
     .pipe($.mocha())
     .once('error', () => {
       process.exit(1);
