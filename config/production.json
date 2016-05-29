@@ -1,0 +1,21 @@
+{
+  "mysql": {
+    "host": "",
+    "post": 3306,
+    "user": "",
+    "password": "",
+    "database": ""
+  },
+  "morgan": {
+    "format": "combined"
+  },
+  "bunyan": {
+    "name": "shopping-prod",
+    "streams": [
+      {
+        "level": "error",
+        "path": "./logs/error.log"
+      }
+    ]
+  }
+}

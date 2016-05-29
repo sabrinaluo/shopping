@@ -1,0 +1,16 @@
+{
+  "mysql": {
+    "host": "www.db4free.net",
+    "post": 3306,
+    "user": "sabrina",
+    "password": "sabrina",
+    "database": "sabrinaluo"
+  },
+  "morgan": {
+    "format": "dev"
+  },
+  "bunyan":{
+    "name": "shopping-dev",
+    "level": "debug"
+  }
+}
