@@ -3,6 +3,7 @@
 const mysql = require('mysql');
 const logger = require('../logger');
 const dbConfig = require('../config').get('mysql');
+const sql = require('./sql');
 
 let connection = mysql.createConnection({
   host: dbConfig.host,
@@ -35,4 +36,4 @@ function q(options) {
   });
 }
 
-module.exports = {q, connection};
+module.exports = {q, connection, sql};

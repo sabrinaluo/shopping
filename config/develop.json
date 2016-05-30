@@ -1,4 +1,5 @@
 {
+  "cors":true,
   "mysql": {
     "host": "www.db4free.net",
     "post": 3306,

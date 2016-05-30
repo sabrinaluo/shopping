@@ -3,26 +3,26 @@
 'use strict';
 
 const chai = require('chai');
-chai.use(require('sinon-chai')).should();
+chai.use(require('sinon-chai'));
+const should = chai.should();
 const sinon = require('sinon');
 const rewire = require('rewire');
 const supertest = require('supertest');
-const app = require('./../../app');
 const db = require('./../../db');
-const checkValues = rewire('./../../api/review').__get__('checkValues');
+const review = rewire('./../../api/review');
+const checkValues = review.__get__('checkValues');
 
-let server = supertest(app);
 let url = '/api/review';
 
 describe('review module', () => {
   describe('private: checkValues', () => {
     it('should return error null, if data is valid', () => {
-      checkValues({
+      should.equal(null, checkValues({
         user_id: 1,
         product_id: 1,
         rating: 1,
         comment: 'test comment'
-      }).should.have.property('error', null);
+      }).message);
     });
 
     it('should return error true, if user_id is not a positive integer', () => {
@@ -31,21 +31,21 @@ describe('review module', () => {
         product_id: 1,
         rating: 1,
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
 
       checkValues({
         user_id: 'abc',
         product_id: 1,
         rating: 1,
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
 
       checkValues({
         user_id: 1.5,
         product_id: 1,
         rating: 1,
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
     });
 
     it('should return error true, if product_id is not a positive integer', () => {
@@ -54,14 +54,14 @@ describe('review module', () => {
         product_id: 'abc',
         rating: 1,
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
 
       checkValues({
         user_id: 1,
         product_id: -1,
         rating: 1,
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
     });
 
     it('should return error true, if rating is not an integer within 0-9', () => {
@@ -70,59 +70,94 @@ describe('review module', () => {
         product_id: 1,
         rating: undefined,
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
 
       checkValues({
         user_id: 1,
         product_id: 1,
         rating: 'abc',
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
 
       checkValues({
         user_id: 1,
         product_id: 1,
         rating: 11,
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
 
       checkValues({
         user_id: 1,
         product_id: 1,
         rating: -1,
         comment: 'test comment'
-      }).should.have.property('error', true);
+      }).message.should.not.equal(null);
     });
   });
 });
 
 describe('/api/review', () => {
   let sandbox;
+  let server;
 
-  before(() => {
+  beforeEach(() => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(db.connection, 'connect').returns(function() {
     });
-    sandbox.stub(db, 'q').returns(Promise.resolve());
+    server = supertest(require('./../../app'));
   });
 
-  after(() => {
+  afterEach(() => {
     sandbox.restore();
   });
 
   it('should 200, if valid params', done => {
+    sandbox.stub(db, 'q').returns(Promise.resolve([{
+      user_id: 1,
+      usertype: 'customer',
+      product_id: 2
+    }]));
     server.post(url)
       .send({user_id: 1, product_id: 1, rating: 1, comment: 'test comment'})
-      .end((e, res) => {
+      .end((err, res) => {
         res.status.should.equal(200);
         done();
       });
   });
 
+  it('should 400, if usertype is not customer', done => {
+    sandbox.stub(db, 'q').returns(Promise.resolve([{
+      user_id: 1,
+      usertype: 'merchant',
+      product_id: 2
+    }]));
+    server.post(url)
+      .send({user_id: 1, product_id: 1, rating: 1, comment: 'test comment'})
+      .end((err, res) => {
+        res.status.should.equal(400);
+        done();
+      });
+  });
+
+  it('should 400, if user or product not exists', done => {
+    sandbox.stub(db, 'q').returns(Promise.resolve([]));
+    server.post(url)
+      .send({user_id: 100, product_id: 1, rating: 1, comment: 'test comment'})
+      .end((err, res) => {
+        res.status.should.equal(400);
+        done();
+      });
+  });
+
   it('should 400, if invalid user_id', done => {
+    sandbox.stub(db, 'q').returns(Promise.resolve([{
+      user_id: 1,
+      usertype: 'customer',
+      product_id: 2
+    }]));
     server.post(url)
       .send({user_id: 'abc', product_id: 1, rating: 1, comment: 'test comment'})
-      .end((e, res) => {
+      .end((err, res) => {
         res.status.should.equal(400);
         done();
       });
@@ -131,7 +166,7 @@ describe('/api/review', () => {
   it('should 400 if invalid product_id', done => {
     server.post(url)
       .send({user_id: 1, product_id: 'abc', rating: 1, comment: 'test comment'})
-      .end((e, res) => {
+      .end((err, res) => {
         res.status.should.equal(400);
         done();
       });

@@ -1,7 +1,11 @@
 {
   "name": "shopping",
   "version": "1.0.0",
-  "description": "",
+  "description": "shopping website demo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sabrinaluo/shopping.git"
+  },
   "main": "app.js",
   "scripts": {
     "test": "gulp test",
@@ -13,12 +17,14 @@
     "body-parser": "^1.15.1",
     "bunyan": "^1.8.1",
     "cookie-parser": "^1.4.3",
+    "cors": "^2.7.1",
     "express": "^4.13.4",
     "express-session": "^1.13.0",
     "lodash": "^4.13.1",
     "morgan": "^1.7.0",
     "mysql": "^2.10.2",
-    "nconf": "^0.8.4"
+    "nconf": "^0.8.4",
+    "throw.js": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",

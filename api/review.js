@@ -1,34 +1,34 @@
 'use strict';
 
 const _ = require('lodash');
+const throwjs = require('throw.js');
 const db = require('../db');
 
-const REVIEW_TABLE = 'review';
+exports.add = function(req, res, next) {
+  let userId = req.body.user_id;
+  let productId = req.body.product_id;
 
-exports.add = function(req, res) {
   let values = {
-    user_id: req.body.user_id, // eslint-disable-line camelcase
-    product_id: req.body.product_id, // eslint-disable-line camelcase
+    user_id: userId,
+    product_id: productId,
     rating: req.body.rating,
     comment: req.body.comment
   };
 
   let validation = checkValues(values);
-  if (validation.error) {
-    return res.status(400).send({message: validation.message});
+  if (validation.message) {
+    return next(new throwjs.badRequest(validation.message));
   }
 
-  let options = {
-    sql: `INSERT INTO \`${REVIEW_TABLE}\` SET ?`,
-    values: values
-  };
-
-  db.q(options)
-    .then(data => {
-      res.send(data);
+  checkUserProduct([userId, productId])
+    .then(() => {
+      return addReview(values);
     })
-    .catch(e => {
-      res.status(400).send({message: e});
+    .then(data => {
+      res.json(data);
+    })
+    .catch(err => {
+      next(err);
     });
 };
 
@@ -40,22 +40,48 @@ exports.add = function(req, res) {
 function checkValues(values) {
   if (!_.isInteger(values.user_id) || values.user_id < 1) {
     return {
-      error: true,
       message: 'user_id is invalid'
     };
   }
   if (!_.isInteger(values.product_id) || values.product_id < 1) {
     return {
-      error: true,
       message: 'product_id is invalid'
     };
   }
   if (!_.isInteger(values.rating) || !_.inRange(values.rating, 0, 10)) {
     return {
-      error: true,
       message: 'product_id is invalid'
     };
   }
 
-  return {error: null, message: null};
+  return {message: null};
+}
+
+function checkUserProduct(values) {
+  let options = {
+    sql: db.sql.getByUserByProduct,
+    values: values
+  };
+
+  return db.q(options)
+    .then(data => {
+      if (!data.length) {
+        throw new throwjs.badRequest('user or product does not exist');
+      }
+
+      if (data[0].usertype !== 'customer') {
+        throw new throwjs.badRequest('invalid user, only customer can post a review');
+      }
+
+      return Promise.resolve(data[0]);
+    });
+}
+
+function addReview(values) {
+  let options = {
+    sql: db.sql.addReview,
+    values: values
+  };
+
+  return db.q(options);
 }

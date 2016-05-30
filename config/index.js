@@ -10,8 +10,8 @@ let env = nconf.get('NODE_ENV') || 'develop';
 let envFilePath = path.join(__dirname, `./${env}.json`);
 nconf.file(envFilePath);
 
-// default port 8080
-let port = nconf.get('PORT') || 8080;
+// default port 3000
+let port = nconf.get('PORT') || 3000;
 nconf.set('PORT', port);
 
 if (env === 'production') {

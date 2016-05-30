@@ -1,39 +1,42 @@
 'use strict';
 
+const throwjs = require('throw.js');
 const db = require('../db');
 
-const PRODUCT_TABLE = 'product';
-
-exports.getAll = function(req, res) {
+exports.getLatestProducts = function(req, res, next) {
+  let brandId = req.query.brand_id;
+  let sql = brandId ? db.sql.getLatestProductsByBrand : db.sql.getLatestProducts;
+  let values = brandId ? [brandId] : [];
   let options = {
-    sql: `SELECT * FROM \`${PRODUCT_TABLE}\` ORDER BY \`date_created\` DESC LIMIT 10`
+    sql: sql,
+    values: values
   };
 
   db.q(options)
     .then(data => {
-      res.send(data);
+      res.json(data);
     })
     .catch(e => {
-      res.status(400).send({message: e});
+      next(new throwjs.badRequest(e));
     });
 };
 
-exports.getById = function(req, res) {
-  let id = req.params.productId;
+exports.getById = function(req, res, next) {
+  let productId = req.params.productId;
   let options = {
-    sql: `SELECT * FROM \`${PRODUCT_TABLE}\` WHERE ?`,
-    values: {id: id}
+    sql: db.sql.getProductById,
+    values: [productId]
   };
 
   db.q(options)
     .then(data => {
       if (data.length) {
-        res.send(data[0]);
+        res.json(data[0]);
       } else {
-        res.status(404).send({message: 'Not Found'});
+        next(new throwjs.notFound());
       }
     })
     .catch(e => {
-      res.status(400).send({message: e});
+      next(new throwjs.badRequest(e));
     });
 };
