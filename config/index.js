@@ -11,7 +11,7 @@ let envFilePath = path.join(__dirname, `./${env}.json`);
 nconf.file(envFilePath);
 
 // default port 3000
-let port = nconf.get('PORT') || 3000;
+let port = nconf.get('PORT') || env === 'develop' ? 3000 : 8080;
 nconf.set('PORT', port);
 
 if (env === 'production') {
