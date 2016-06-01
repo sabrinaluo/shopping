@@ -13,6 +13,7 @@ FROM
         product.id AS product_id,
             product.name AS product_name,
             product.description,
+            product.price,
             brand.name AS brand_name,
             product.date_created
     FROM
@@ -20,7 +21,7 @@ FROM
     LEFT JOIN brand ON brand.id = product.brand_id
     WHERE brand.id = ?
     ORDER BY date_created DESC
-    LIMIT 1,10) t
+    LIMIT 1, 10) t
         LEFT JOIN
     review ON review.product_id = t.product_id
         LEFT JOIN
