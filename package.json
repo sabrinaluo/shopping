@@ -2,6 +2,9 @@
   "name": "shopping",
   "version": "1.0.0",
   "description": "shopping website demo",
+  "engines": {
+    "node": "4.4.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sabrinaluo/shopping.git"
@@ -9,6 +12,7 @@
   "main": "app.js",
   "scripts": {
     "test": "gulp test",
+    "test-cov": "istanbul cover _mocha -- --opts ./test/mocha.opts",
     "start": "node app | bunyan -o short"
   },
   "author": "Sabrina Luo <luohaojing@gmail.com>",
@@ -34,6 +38,7 @@
     "gulp-eslint": "^2.0.0",
     "gulp-load-plugins": "^1.2.4",
     "gulp-mocha": "^2.2.0",
+    "istanbul": "1.0.0-alpha.2",
     "mocha": "^2.5.3",
     "rewire": "^2.5.1",
     "should": "^8.4.0",
