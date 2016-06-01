@@ -11,7 +11,7 @@ exports.add = function(req, res, next) {
   let values = {
     user_id: userId,
     product_id: productId,
-    rating: req.body.rating,
+    rating: Number(req.body.rating),
     comment: req.body.comment
   };
 
@@ -50,7 +50,7 @@ function checkValues(values) {
   }
   if (!_.isInteger(values.rating) || !_.inRange(values.rating, 0, 10)) {
     return {
-      message: 'product_id is invalid'
+      message: 'rating is invalid'
     };
   }
 
