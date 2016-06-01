@@ -3,6 +3,7 @@
 'use strict';
 
 const chai = require('chai');
+chai.use(require('chai-as-promised'));
 chai.use(require('sinon-chai'));
 const should = chai.should();
 const sinon = require('sinon');
@@ -11,6 +12,7 @@ const supertest = require('supertest');
 const db = require('./../../db');
 const review = rewire('./../../api/review');
 const checkValues = review.__get__('checkValues');
+const checkUserProduct = review.__get__('checkUserProduct');
 
 let url = '/api/review';
 
@@ -92,6 +94,37 @@ describe('review module', () => {
         rating: -1,
         comment: 'test comment'
       }).message.should.not.equal(null);
+    });
+  });
+
+  describe('private: checkUserProduct', ()=> {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should be fulfilled, if db response valid data', ()=> {
+      sandbox.stub(db, 'q').returns(Promise.resolve([{
+        user_id: 1,
+        usertype: 'customer',
+        product_id: 2
+      }]));
+      return checkUserProduct().should.be.fulfilled;
+    });
+
+    it('should be rejected, if db response=[]', () => {
+      sandbox.stub(db, 'q').returns(Promise.resolve([]));
+      return checkUserProduct().should.be.rejectedWith('user or product does not exist');
+    });
+
+    it('should be rejected, if usertype is not customer', () => {
+      sandbox.stub(db, 'q').returns(Promise.resolve([{usertype: 'merchant'}]));
+      return checkUserProduct().should.be.rejectedWith('invalid user, only customer can post a review');
     });
   });
 });
