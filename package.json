@@ -12,7 +12,7 @@
   "main": "app.js",
   "scripts": {
     "test": "gulp test",
-    "test-cov": "istanbul cover _mocha -- --opts ./test/mocha.opts",
+    "test:cov": "istanbul cover _mocha -- --opts ./test/mocha.opts",
     "start": "node app | bunyan -o short"
   },
   "author": "Sabrina Luo <luohaojing@gmail.com>",
