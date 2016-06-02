@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -16,7 +17,9 @@ const PORT = config.get('PORT');
 
 db.connection.connect();
 
+const STATIC_DIR = path.join(__dirname, 'public');
 let app = express();
+app.use('/', express.static(STATIC_DIR));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({
