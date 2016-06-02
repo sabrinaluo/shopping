@@ -4,6 +4,7 @@ SELECT
     t.description,
     t.brand_name,
     t.date_created,
+    t.price,
     review.rating,
     review.comment,
     MAX(review.date_created) AS latest_review_date,

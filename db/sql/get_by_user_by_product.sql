@@ -5,4 +5,4 @@ SELECT
 FROM
     user
         INNER JOIN
-    product ON product.id = ? AND user.id = ?;
+    product ON user.id = ? AND product.id = ?;
