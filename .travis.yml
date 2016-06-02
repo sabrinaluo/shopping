@@ -1,10 +1,22 @@
 language: node_js
 node_js:
-- '4.4.0'
+  - 4.4.0
 env:
-- NODE_ENV=develop
+  - NODE_ENV=develop
 branches:
   only:
-  - master
+    - master
+before_script:
+  - ./.travis.build.sh
 script:
-- npm test
+  - npm test
+deploy:
+  provider: heroku
+  api_key:
+    secure: GSbpgjV3LUacvJbQxIRvoUWtFu3hnt/cRta5Q7UxwiMZpFmCmeNL7tYRo5gauW8b0IzU3TgV3RXGmaq/PBtAgAF3wHjdfRnc84FE4oFYdiR3DlTvd0vQnSm/nAyGUy6zBRtnjJwSaHDHyoHM2BVB3aUOUPKrofVtSH+XAz07Pjq6H/6iORCzQU8gpR48MeObBjCqnJYBRtCCzSmiuPRKojQOzasXIVg0tLLCFo7M58Phwbav+SqzA54gqHXo5NGVn+3QGpyQtI0er1fa6mgmk8jFngWdth7qC0wmXb91nSNWTn8gkp+ARsLZ1+pZF21UNBlmarO8M7Yy2YfH+aY6dLg2r7DrwokYnWLHE2BhMpOyIJnNOSeSWrD5Q9GpMdnM0qvVY99M3lpNo/Et02zYeC8Q3MZ+ejbTh5F8Ueg9UTj86Q0hJYr45IFNi0gFwNFCxwf1G42VUgQIMOthG3zJbvoqm3CyJ+MEgbctB6QN41AwdxEd2rEDPpPHlM/J5LDFJfKObivz96COsQTFuT26d1J9eiK6P0hS5nq4gB8Jz583Gkh8AnWFe2zWOkGN9YvFbYfsEnt+qIU77wFtZMCECLkMRxVZQQq/n3Gwq+PnRewigePF72B72JFwvoHbVqXyRGq9rodHQY7jQrUJ8D0NCJ0kWN9Ovo6WoTQxWO726Rc=
+  app: shopping-sab
+  skip_cleanup: true
+  on:
+    repo: sabrinaluo/shopping
+  run:
+    - restart
