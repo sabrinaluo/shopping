@@ -1,9 +1,11 @@
 # shopping-server [![Build Status](https://travis-ci.org/sabrinaluo/shopping.svg?branch=master)](https://travis-ci.org/sabrinaluo/shopping)
 Demo: https://shopping-sab.herokuapp.com
+
 Note: Due to heroku app [sleepping policy](https://blog.heroku.com/archives/2013/6/20/app_sleeping_on_heroku), you may need to wait for few seconds until the app wakes up.
 
 ## Quick Start
 Before start
+
 1. Edit `config/develop.json` and `config/production.json`
 2. Create database schema
 3. Set `NODE_ENV` to `develop` / `production`
@@ -41,8 +43,10 @@ Root: /api
 
 ## Schema
 You can use `schema.sql` to create a `shopping` schema
+
 ![schema](https://cloud.githubusercontent.com/assets/5300359/15782805/36f17be4-29de-11e6-9e17-ac267343aa7f.png)
 
 ## Continous Integration - Travis
 Integrated with Travis, this app is tested, built, deployed to heroku automatically.
+
 For details, see `.travis.yml`
