@@ -3,7 +3,7 @@
 const gulp = require('gulp');
 const $ = require('gulp-load-plugins')();
 
-let files = ['./**/*.js', '!node_modules/'];
+let files = ['./api/**/*.js', './config/**/*.js', './db/**/*.js', './test/**/*.js', './*.js'];
 
 gulp.task('lint', () => {
   return gulp.src(files)
