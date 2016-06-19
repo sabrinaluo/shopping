@@ -1,11 +1,12 @@
 'use strict';
-
-const mysql = require('mysql');
-const logger = require('../logger');
+const bluebird = require('bluebird');
+const mysql = bluebird.promisifyAll(require('mysql'));
+bluebird.promisifyAll(require("mysql/lib/Connection").prototype);
+bluebird.promisifyAll(require("mysql/lib/Pool").prototype);
 const dbConfig = require('../config').get('mysql');
 const sql = require('./sql');
 
-let connection = mysql.createConnection({
+let pool = mysql.createPool({
   host: dbConfig.host,
   port: dbConfig.port,
   user: dbConfig.user,
@@ -13,27 +14,4 @@ let connection = mysql.createConnection({
   database: dbConfig.database
 });
 
-/**
- * Promisify query method
- * see https://github.com/felixge/node-mysql The third form .query(options, callback)
- * @param {object} options - options for query database
- * @param {string} options.sql - sql for execution
- * @param {array|object} [options.values] - values
- * @return {Promise} - query result, reject with {object}, resolve with {object[]}
- */
-function q(options) {
-  return new Promise((resolve, reject) => {
-    connection.query(options, (err, rows) => {
-      logger.debug('db query: ', options);
-      if (err) {
-        logger.error('db err: ', err);
-        reject(err);
-      } else {
-        logger.debug('db response: ', rows);
-        resolve(rows);
-      }
-    });
-  });
-}
-
-module.exports = {q, connection, sql};
+module.exports = {pool, sql};

@@ -5,7 +5,8 @@
     "post": 3306,
     "user": "sabrina",
     "password": "sabrina",
-    "database": "sabrinaluo"
+    "database": "sabrinaluo",
+    "connectionLimit": 10
   },
   "morgan": {
     "format": "combined"

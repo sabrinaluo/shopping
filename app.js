@@ -9,13 +9,10 @@ const morgan = require('morgan');
 const cors = require('cors');
 const config = require('./config');
 const logger = require('./logger');
-const db = require('./db');
 const apiRouter = require('./api');
 const errorHandler = require('./error_handler');
 
 const PORT = config.get('PORT');
-
-db.connection.connect();
 
 const STATIC_DIR = path.join(__dirname, 'public');
 let app = express();

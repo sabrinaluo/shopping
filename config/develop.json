@@ -1,16 +1,17 @@
 {
-  "cors":true,
+  "cors": true,
   "mysql": {
     "host": "www.db4free.net",
     "post": 3306,
     "user": "sabrina",
     "password": "sabrina",
-    "database": "sabrinaluo"
+    "database": "sabrinaluo",
+    "connectionLimit": 10
   },
   "morgan": {
     "format": "dev"
   },
-  "bunyan":{
+  "bunyan": {
     "name": "shopping-dev",
     "level": "debug"
   }

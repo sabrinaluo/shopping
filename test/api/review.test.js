@@ -1,5 +1,3 @@
-/* eslint-env mocha */
-/* eslint-disable camelcase*/
 'use strict';
 
 const chai = require('chai');
@@ -97,7 +95,7 @@ describe('review module', () => {
     });
   });
 
-  describe('private: checkUserProduct', ()=> {
+  describe('private: checkUserProduct', () => {
     let sandbox;
 
     beforeEach(() => {
@@ -108,23 +106,44 @@ describe('review module', () => {
       sandbox.restore();
     });
 
-    it('should be fulfilled, if db response valid data', ()=> {
-      sandbox.stub(db, 'q').returns(Promise.resolve([{
-        user_id: 1,
-        usertype: 'customer',
-        product_id: 2
-      }]));
-      return checkUserProduct().should.be.fulfilled;
+    it('should be fulfilled, if db response valid data', () => {
+      let values = [];
+      let connection = {
+        queryAsync: () => Promise.resolve([{
+          user_id: 1,
+          usertype: 'customer',
+          product_id: 2
+        }]),
+        release: () => {
+        },
+        rollback: () => {
+        }
+      };
+      return checkUserProduct(values, connection).should.be.fulfilled;
     });
 
     it('should be rejected, if db response=[]', () => {
-      sandbox.stub(db, 'q').returns(Promise.resolve([]));
-      return checkUserProduct().should.be.rejectedWith('user or product does not exist');
+      let values = [];
+      let connection = {
+        queryAsync: () => Promise.resolve([]),
+        release: () => {
+        },
+        rollback: () => {
+        }
+      };
+      return checkUserProduct(values, connection).should.be.rejectedWith('user or product does not exist');
     });
 
     it('should be rejected, if usertype is not customer', () => {
-      sandbox.stub(db, 'q').returns(Promise.resolve([{usertype: 'merchant'}]));
-      return checkUserProduct().should.be.rejectedWith('invalid user, only customer can post a review');
+      let values = [];
+      let connection = {
+        queryAsync: () => Promise.resolve([{usertype: 'merchant'}]),
+        release: () => {
+        },
+        rollback: () => {
+        }
+      };
+      return checkUserProduct(values, connection).should.be.rejectedWith('invalid user, only customer can post a review');
     });
   });
 });
@@ -135,8 +154,6 @@ describe('/api/review', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    sandbox.stub(db.connection, 'connect').returns(function() {
-    });
     server = supertest(require('./../../app'));
   });
 
@@ -145,11 +162,22 @@ describe('/api/review', () => {
   });
 
   it('should 200, if valid params', done => {
-    sandbox.stub(db, 'q').returns(Promise.resolve([{
-      user_id: 1,
-      usertype: 'customer',
-      product_id: 2
-    }]));
+    sandbox.stub(db.pool, 'getConnectionAsync').returns(
+      Promise.resolve({
+        queryAsync: () => Promise.resolve([{
+          user_id: 1,
+          usertype: 'customer',
+          product_id: 2
+        }]),
+        release: () => {
+        },
+        rollback: () => {
+        },
+        beginTransactionAsync: () => Promise.resolve(),
+        commit: () => {
+        }
+      }));
+
     server.post(url)
       .send({user_id: 1, product_id: 1, rating: 1, comment: 'test comment'})
       .end((err, res) => {
@@ -159,11 +187,22 @@ describe('/api/review', () => {
   });
 
   it('should 400, if usertype is not customer', done => {
-    sandbox.stub(db, 'q').returns(Promise.resolve([{
-      user_id: 1,
-      usertype: 'merchant',
-      product_id: 2
-    }]));
+    sandbox.stub(db.pool, 'getConnectionAsync').returns(
+      Promise.resolve({
+        queryAsync: () => Promise.resolve([{
+          user_id: 1,
+          usertype: 'merchant',
+          product_id: 2
+        }]),
+        release: () => {
+        },
+        rollback: () => {
+        },
+        beginTransactionAsync: () => Promise.resolve(),
+        commit: () => {
+        }
+      }));
+
     server.post(url)
       .send({user_id: 1, product_id: 1, rating: 1, comment: 'test comment'})
       .end((err, res) => {
@@ -173,7 +212,17 @@ describe('/api/review', () => {
   });
 
   it('should 400, if user or product not exists', done => {
-    sandbox.stub(db, 'q').returns(Promise.resolve([]));
+    sandbox.stub(db.pool, 'getConnectionAsync').returns(
+      Promise.resolve({
+        queryAsync: () => Promise.resolve([]),
+        release: () => {
+        },
+        rollback: () => {
+        },
+        beginTransactionAsync: () => Promise.resolve(),
+        commit: () => {
+        }
+      }));
     server.post(url)
       .send({user_id: 100, product_id: 1, rating: 1, comment: 'test comment'})
       .end((err, res) => {
@@ -183,11 +232,22 @@ describe('/api/review', () => {
   });
 
   it('should 400, if invalid user_id', done => {
-    sandbox.stub(db, 'q').returns(Promise.resolve([{
-      user_id: 1,
-      usertype: 'customer',
-      product_id: 2
-    }]));
+    sandbox.stub(db.pool, 'getConnectionAsync').returns(
+      Promise.resolve({
+        queryAsync: () => Promise.resolve([{
+          user_id: 1,
+          usertype: 'customer',
+          product_id: 2
+        }]),
+        release: () => {
+        },
+        rollback: () => {
+        },
+        beginTransactionAsync: () => Promise.resolve(),
+        commit: () => {
+        }
+      }));
+
     server.post(url)
       .send({user_id: 'abc', product_id: 1, rating: 1, comment: 'test comment'})
       .end((err, res) => {

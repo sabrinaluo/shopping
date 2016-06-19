@@ -1,5 +1,3 @@
-/* eslint-env mocha */
-/* eslint-disable camelcase */
 'use strict';
 
 const chai = require('chai');
@@ -14,8 +12,6 @@ describe('product', () => {
 
   before(() => {
     sandbox = sinon.sandbox.create();
-    sandbox.stub(db.connection, 'connect').returns(function() {
-    });
     server = supertest(require('./../../app'));
   });
 
@@ -25,11 +21,17 @@ describe('product', () => {
 
   describe('/api/product', () => {
     afterEach(() => {
-      db.q.restore();
+      sandbox.restore();
     });
 
     it('should 200, with no brand id', done => {
-      sandbox.stub(db, 'q').returns(Promise.resolve([]));
+      sandbox.stub(db.pool, 'getConnectionAsync').returns(
+        Promise.resolve({
+          queryAsync: () => Promise.resolve([]),
+          release: () => {
+          }
+        })
+      );
       server.get('/api/product')
         .end((err, res) => {
           res.status.should.equal(200);
@@ -40,11 +42,16 @@ describe('product', () => {
 
   describe('/api/product/:productId', () => {
     afterEach(() => {
-      db.q.restore();
+      sandbox.restore();
     });
 
     it('should 404, if product not exists', done => {
-      sandbox.stub(db, 'q').returns(Promise.resolve([]));
+      sandbox.stub(db.pool, 'getConnectionAsync').returns(
+        Promise.resolve({
+          queryAsync: () => Promise.resolve([]),
+          release: () => {
+          }
+        }));
       server.get('/api/product/10')
         .end((err, res) => {
           res.status.should.equal(404);
@@ -53,7 +60,12 @@ describe('product', () => {
     });
 
     it('should 200, if product exists', done => {
-      sandbox.stub(db, 'q').returns(Promise.resolve([{}]));
+      sandbox.stub(db.pool, 'getConnectionAsync').returns(
+        Promise.resolve({
+          queryAsync: () => Promise.resolve([{}]),
+          release: () => {
+          }
+        }));
       server.get('/api/product/1')
         .end((err, res) => {
           res.status.should.equal(200);

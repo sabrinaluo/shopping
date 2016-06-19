@@ -1,5 +1,5 @@
 'use strict';
-
+const co = require('co');
 const _ = require('lodash');
 const throwjs = require('throw.js');
 const db = require('../db');
@@ -9,8 +9,8 @@ exports.add = function(req, res, next) {
   let productId = req.body.product_id;
 
   let values = {
-    user_id: userId,
-    product_id: productId,
+    user_id: userId, // eslint-disable-line
+    product_id: productId, // eslint-disable-line
     rating: Number(req.body.rating),
     comment: req.body.comment
   };
@@ -20,16 +20,20 @@ exports.add = function(req, res, next) {
     return next(new throwjs.badRequest(validation.message));
   }
 
-  checkUserProduct([userId, productId])
-    .then(() => {
-      return addReview(values);
-    })
-    .then(data => {
-      res.json(data);
-    })
-    .catch(err => {
-      next(err);
-    });
+  let connection;
+  co(function * () {
+    connection = yield db.pool.getConnectionAsync();
+    yield checkUserProduct([userId, productId], connection);
+    yield connection.beginTransactionAsync();
+    let data = yield addReview(values, connection);
+    connection.commit();
+    connection.release();
+    res.json(data);
+  }).catch(e => {
+    connection.rollback();
+    connection.release();
+    next(e);
+  });
 };
 
 /**
@@ -57,31 +61,43 @@ function checkValues(values) {
   return {message: null};
 }
 
-function checkUserProduct(values) {
+/**
+ * check user and product exists or not
+ * @param {array} values - vaules for sql
+ * @param {object} connection - mysql.connection
+ * @return {Promise} user and product info
+ */
+function checkUserProduct(values, connection) {
   let options = {
     sql: db.sql.getByUserByProduct,
     values: values
   };
 
-  return db.q(options)
-    .then(data => {
-      if (!data.length) {
-        throw new throwjs.badRequest('user or product does not exist');
-      }
+  return co(function * () {
+    let data = yield connection.queryAsync(options);
+    if (!data.length) {
+      throw new throwjs.badRequest('user or product does not exist');
+    }
 
-      if (data[0].usertype !== 'customer') {
-        throw new throwjs.badRequest('invalid user, only customer can post a review');
-      }
+    if (data[0].usertype !== 'customer') {
+      throw new throwjs.badRequest('invalid user, only customer can post a review');
+    }
 
-      return Promise.resolve(data[0]);
-    });
+    return data[0];
+  });
 }
 
-function addReview(values) {
+/**
+ * add review into database
+ * @param {array} values - vaules for sql
+ * @param {object} connection - mysql.connection
+ * @return {Promise} execution result from database
+ */
+function addReview(values, connection) {
   let options = {
     sql: db.sql.addReview,
     values: values
   };
 
-  return db.q(options);
+  return connection.queryAsync(options);
 }
