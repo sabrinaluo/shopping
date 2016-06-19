@@ -1,29 +1,29 @@
 SELECT
-    product . *,
-    brand.name as brand_name,
-    r.id AS review_id,
+    pr . *,
     r.rating,
     r.comment,
-    r.date_created AS review_date,
-    r.username
+    r.id AS review_id,
+    u.username,
+    b.name AS brand_name
 FROM
-    product
-        LEFT JOIN
     (SELECT
-        a . *, user.username
+        p . *, r.product_id, MAX(r.date_created) AS review_date
     FROM
-        review a
-    INNER JOIN (SELECT
-        product_id, MAX(date_created) AS date_created
+        (SELECT
+        *
     FROM
-        review
-    GROUP BY product_id) b
-    INNER JOIN user ON a.product_id = b.product_id
-        AND a.date_created = b.date_created
-        AND user.id = a.user_id) r ON r.product_id = product.id
-        left join
-    brand ON brand.id = product.brand_id
-WHERE
-    product.brand_id = ?
-ORDER BY product.date_created DESC
-LIMIT 0 , 10;
+        product
+    WHERE
+        product.brand_id = ?
+    ORDER BY date_created DESC
+    LIMIT 0 , 10) p
+    LEFT JOIN review r ON r.product_id = p.id
+    GROUP BY p.id) pr
+        LEFT JOIN
+    review r ON r.product_id = pr.product_id
+        AND r.date_created = pr.review_date
+        LEFT JOIN
+    user u ON u.id = r.user_id
+        LEFT JOIN
+    brand b ON b.id = pr.brand_id
+ORDER BY pr.date_created DESC;
